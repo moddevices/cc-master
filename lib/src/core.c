@@ -339,8 +339,7 @@ static void parser(cc_handle_t *handle)
         DEBUG_MSG("handshake received\n");
         DEBUG_MSG("  random id: %i\n", handshake.random_id);
         DEBUG_MSG("  protocol: v%i.%i\n", handshake.protocol.major, handshake.protocol.minor);
-        DEBUG_MSG("  firmware: v%i.%i.%i\n",
-            handshake.protocol.major, handshake.protocol.minor, handshake.protocol.micro);
+        DEBUG_MSG("  firmware: v%i.%i.%i\n", handshake.protocol.major, handshake.firmware.minor, handshake.firmware.micro);
 
         // create and send response message
         cc_msg_t *reply = cc_msg_builder(0, CC_CMD_HANDSHAKE, &response);
@@ -360,6 +359,12 @@ static void parser(cc_handle_t *handle)
             DEBUG_MSG("  label: %s\n", device->label->text);
             DEBUG_MSG("  channel: %i\n", device->channel);
             DEBUG_MSG("  actuators count: %i\n", device->actuators_count);
+            DEBUG_MSG("  actuatorgroups count: %i\n", device->actuatorgroups_count);
+            DEBUG_MSG(" idact1: %i\n", device->actuators[0]->id );
+            DEBUG_MSG( " group_id: %i, group_name: %s, act1_ingroup: %i, act2_ingroup: %i\n", 
+            device->actuatorgroups[0]->id, device->actuatorgroups[0]->name->text, device->actuatorgroups[0]->actuators_in_actuatorgroup[0], device->actuatorgroups[0]->actuators_in_actuatorgroup[1]);
+            DEBUG_MSG( " group_id: %i, group_name: %s, act1_ingroup: %i, act2_ingroup: %i\n",
+            device->actuatorgroups[1]->id, device->actuatorgroups[1]->name->text, device->actuatorgroups[1]->actuators_in_actuatorgroup[0], device->actuatorgroups[1]->actuators_in_actuatorgroup[1]);
 
             // device is ready to operate
             device->status = CC_DEVICE_CONNECTED;

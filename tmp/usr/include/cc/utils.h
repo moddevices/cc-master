@@ -17,8 +17,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CONTROL_CHAIN_H
-#define CONTROL_CHAIN_H
+#ifndef CC_UTILS_H
+#define CC_UTILS_H
 
 /*
 ****************************************************************************************************
@@ -26,13 +26,7 @@
 ****************************************************************************************************
 */
 
-#include "core.h"
-#include "utils.h"
-#include "msg.h"
-#include "handshake.h"
-#include "device.h"
-#include "assignment.h"
-#include "update.h"
+#include <stdint.h>
 
 
 /*
@@ -41,9 +35,8 @@
 ****************************************************************************************************
 */
 
-#define CC_PROTOCOL_MAJOR       0
-#define CC_PROTOCOL_MINOR       7
-#define CC_PROTOCOL_VERSION     STR(CC_PROTOCOL_MAJOR) "." STR(CC_PROTOCOL_MINOR)
+#define STR_AUX(s)  #s
+#define STR(s)      STR_AUX(s)
 
 
 /*
@@ -59,6 +52,15 @@
 ****************************************************************************************************
 */
 
+typedef struct string_t {
+    uint8_t size;
+    char *text;
+} string_t;
+
+typedef struct version_t {
+    int major, minor, micro;
+} version_t;
+
 
 /*
 ****************************************************************************************************
@@ -66,13 +68,20 @@
 ****************************************************************************************************
 */
 
-int cc_assignment(cc_handle_t *handle, cc_assignment_t *assignment);
-void cc_unassignment(cc_handle_t *handle, cc_assignment_key_t *assignment);
-int cc_value_set(cc_handle_t *handle,  cc_set_value_t *update);
-void cc_data_update_cb(cc_handle_t *handle, void (*callback)(void *arg));
-void cc_device_status_cb(cc_handle_t *handle, void (*callback)(void *arg));
-void cc_device_disable(cc_handle_t *handle, int device_id);
+/*
+ http://stackoverflow.com/a/15171925/1283578
+ 8-bit CRC with polynomial x^8+x^6+x^3+x^2+1, 0x14D.
+ Chosen based on Koopman, et al. (0xA6 in his notation = 0x14D >> 1):
+ http://www.ece.cmu.edu/~koopman/roses/dsn04/koopman04_crc_poly_embedded.pdf
+*/
+uint8_t crc8(const uint8_t *data, uint32_t len);
 
+string_t *string_create(const char *str);
+uint8_t string_serialize(const string_t *str, uint8_t *buffer);
+string_t *string_deserialize(const uint8_t *data, uint32_t *written);
+void string_destroy(string_t *str);
+
+int float_to_bytes(const float value, uint8_t *array);
 
 /*
 ****************************************************************************************************

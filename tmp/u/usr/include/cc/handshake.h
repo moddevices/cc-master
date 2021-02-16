@@ -17,8 +17,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CONTROL_CHAIN_H
-#define CONTROL_CHAIN_H
+#ifndef CC_HANDSHAKE_H
+#define CC_HANDSHAKE_H
+
 
 /*
 ****************************************************************************************************
@@ -26,13 +27,8 @@
 ****************************************************************************************************
 */
 
-#include "core.h"
+#include <stdint.h>
 #include "utils.h"
-#include "msg.h"
-#include "handshake.h"
-#include "device.h"
-#include "assignment.h"
-#include "update.h"
 
 
 /*
@@ -40,10 +36,6 @@
 *       MACROS
 ****************************************************************************************************
 */
-
-#define CC_PROTOCOL_MAJOR       0
-#define CC_PROTOCOL_MINOR       7
-#define CC_PROTOCOL_VERSION     STR(CC_PROTOCOL_MAJOR) "." STR(CC_PROTOCOL_MINOR)
 
 
 /*
@@ -59,6 +51,21 @@
 ****************************************************************************************************
 */
 
+enum {CC_HANDSHAKE_OK, CC_UPDATE_AVAILABLE, CC_UPDATE_REQUIRED};
+
+// handshake structure received from device
+typedef struct cc_handshake_dev_t {
+    string_t *uri; // required for versions before v0.4
+    uint16_t random_id;
+    version_t protocol, firmware;
+} cc_handshake_dev_t;
+
+// handshake structure sent to device
+typedef struct cc_handshake_mod_t {
+    uint16_t random_id;
+    int status, device_id;
+} cc_handshake_mod_t;
+
 
 /*
 ****************************************************************************************************
@@ -66,12 +73,7 @@
 ****************************************************************************************************
 */
 
-int cc_assignment(cc_handle_t *handle, cc_assignment_t *assignment);
-void cc_unassignment(cc_handle_t *handle, cc_assignment_key_t *assignment);
-int cc_value_set(cc_handle_t *handle,  cc_set_value_t *update);
-void cc_data_update_cb(cc_handle_t *handle, void (*callback)(void *arg));
-void cc_device_status_cb(cc_handle_t *handle, void (*callback)(void *arg));
-void cc_device_disable(cc_handle_t *handle, int device_id);
+int cc_handshake_check(cc_handshake_dev_t *received, cc_handshake_mod_t *response);
 
 
 /*

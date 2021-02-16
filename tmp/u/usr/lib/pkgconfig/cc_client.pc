@@ -1,0 +1,10 @@
+prefix=/u/usr
+exec_prefix=/u/usr
+libdir=/u/usr/lib
+includedir=/u/usr/include
+
+Name: Control Chain Client
+Version: 0.6.0
+Description: Client library to communicate with control chain server.
+Libs: -L${libdir} -lcontrolchain -lcc_client
+Cflags: -I${includedir}/cc

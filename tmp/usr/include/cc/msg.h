@@ -17,8 +17,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CONTROL_CHAIN_H
-#define CONTROL_CHAIN_H
+#ifndef CC_MSG_H
+#define CC_MSG_H
+
 
 /*
 ****************************************************************************************************
@@ -26,13 +27,7 @@
 ****************************************************************************************************
 */
 
-#include "core.h"
-#include "utils.h"
-#include "msg.h"
-#include "handshake.h"
-#include "device.h"
-#include "assignment.h"
-#include "update.h"
+#include <stdint.h>
 
 
 /*
@@ -41,9 +36,8 @@
 ****************************************************************************************************
 */
 
-#define CC_PROTOCOL_MAJOR       0
-#define CC_PROTOCOL_MINOR       7
-#define CC_PROTOCOL_VERSION     STR(CC_PROTOCOL_MAJOR) "." STR(CC_PROTOCOL_MINOR)
+#define CC_MSG_HEADER_SIZE      4
+#define CC_DATA_BUFFER_SIZE     8*1024
 
 
 /*
@@ -59,6 +53,20 @@
 ****************************************************************************************************
 */
 
+// commands definition
+enum cc_cmd_t {CC_CMD_CHAIN_SYNC, CC_CMD_HANDSHAKE, CC_CMD_DEV_CONTROL, CC_CMD_DEV_DESCRIPTOR,
+               CC_CMD_ASSIGNMENT, CC_CMD_DATA_UPDATE, CC_CMD_UNASSIGNMENT, CC_CMD_SET_VALUE, CC_NUM_COMMANDS};
+
+// fields names and sizes in bytes
+// DEV_ADDRESS (1), COMMAND (1), DATA_SIZE (2), DATA (N), CHECKSUM (1)
+
+typedef struct cc_msg_t {
+    uint8_t device_id;
+    uint8_t command;
+    uint16_t data_size;
+    uint8_t *header, *data;
+} cc_msg_t;
+
 
 /*
 ****************************************************************************************************
@@ -66,12 +74,11 @@
 ****************************************************************************************************
 */
 
-int cc_assignment(cc_handle_t *handle, cc_assignment_t *assignment);
-void cc_unassignment(cc_handle_t *handle, cc_assignment_key_t *assignment);
-int cc_value_set(cc_handle_t *handle,  cc_set_value_t *update);
-void cc_data_update_cb(cc_handle_t *handle, void (*callback)(void *arg));
-void cc_device_status_cb(cc_handle_t *handle, void (*callback)(void *arg));
-void cc_device_disable(cc_handle_t *handle, int device_id);
+cc_msg_t* cc_msg_new(void);
+void cc_msg_delete(cc_msg_t *msg);
+void cc_msg_parser(const cc_msg_t *msg, void *data_struct);
+cc_msg_t* cc_msg_builder(int device_id, int command, const void *data_struct);
+void cc_msg_print(const char *header, const cc_msg_t *msg);
 
 
 /*

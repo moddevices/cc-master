@@ -17,8 +17,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CONTROL_CHAIN_H
-#define CONTROL_CHAIN_H
+#ifndef CC_CLIENT_H
+#define CC_CLIENT_H
+
 
 /*
 ****************************************************************************************************
@@ -26,13 +27,7 @@
 ****************************************************************************************************
 */
 
-#include "core.h"
-#include "utils.h"
-#include "msg.h"
-#include "handshake.h"
-#include "device.h"
-#include "assignment.h"
-#include "update.h"
+#include "control_chain.h"
 
 
 /*
@@ -40,10 +35,6 @@
 *       MACROS
 ****************************************************************************************************
 */
-
-#define CC_PROTOCOL_MAJOR       0
-#define CC_PROTOCOL_MINOR       7
-#define CC_PROTOCOL_VERSION     STR(CC_PROTOCOL_MAJOR) "." STR(CC_PROTOCOL_MINOR)
 
 
 /*
@@ -59,6 +50,8 @@
 ****************************************************************************************************
 */
 
+typedef struct cc_client_t cc_client_t;
+
 
 /*
 ****************************************************************************************************
@@ -66,12 +59,19 @@
 ****************************************************************************************************
 */
 
-int cc_assignment(cc_handle_t *handle, cc_assignment_t *assignment);
-void cc_unassignment(cc_handle_t *handle, cc_assignment_key_t *assignment);
-int cc_value_set(cc_handle_t *handle,  cc_set_value_t *update);
-void cc_data_update_cb(cc_handle_t *handle, void (*callback)(void *arg));
-void cc_device_status_cb(cc_handle_t *handle, void (*callback)(void *arg));
-void cc_device_disable(cc_handle_t *handle, int device_id);
+cc_client_t *cc_client_new(const char *path);
+void cc_client_delete(cc_client_t *client);
+
+int cc_client_assignment(cc_client_t *client, cc_assignment_t *assignment);
+void cc_client_unassignment(cc_client_t *client, cc_assignment_key_t *assignment);
+int cc_client_value_set(cc_client_t *client, cc_set_value_t *update);
+
+int* cc_client_device_list(cc_client_t *client);
+char *cc_client_device_descriptor(cc_client_t *client, int device_id);
+void cc_client_device_disable(cc_client_t *client, int device_id);
+
+void cc_client_device_status_cb(cc_client_t *client, void (*callback)(void *arg));
+void cc_client_data_update_cb(cc_client_t *client, void (*callback)(void *arg));
 
 
 /*

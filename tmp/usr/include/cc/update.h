@@ -17,8 +17,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CONTROL_CHAIN_H
-#define CONTROL_CHAIN_H
+#ifndef CC_UPDATE_H
+#define CC_UPDATE_H
+
 
 /*
 ****************************************************************************************************
@@ -26,13 +27,7 @@
 ****************************************************************************************************
 */
 
-#include "core.h"
-#include "utils.h"
-#include "msg.h"
-#include "handshake.h"
-#include "device.h"
-#include "assignment.h"
-#include "update.h"
+#include <stdint.h>
 
 
 /*
@@ -40,10 +35,6 @@
 *       MACROS
 ****************************************************************************************************
 */
-
-#define CC_PROTOCOL_MAJOR       0
-#define CC_PROTOCOL_MINOR       7
-#define CC_PROTOCOL_VERSION     STR(CC_PROTOCOL_MAJOR) "." STR(CC_PROTOCOL_MINOR)
 
 
 /*
@@ -59,6 +50,25 @@
 ****************************************************************************************************
 */
 
+typedef struct cc_update_data_t {
+    int assignment_id;
+    float value;
+} cc_update_data_t;
+
+typedef struct cc_set_value_t {
+    int device_id;
+    int assignment_id;
+    int actuator_id;
+    float value;
+} cc_set_value_t;
+
+typedef struct cc_update_list_t {
+    int device_id, count;
+    cc_update_data_t *list;
+    uint8_t *raw_data;
+    int raw_size;
+} cc_update_list_t;
+
 
 /*
 ****************************************************************************************************
@@ -66,12 +76,8 @@
 ****************************************************************************************************
 */
 
-int cc_assignment(cc_handle_t *handle, cc_assignment_t *assignment);
-void cc_unassignment(cc_handle_t *handle, cc_assignment_key_t *assignment);
-int cc_value_set(cc_handle_t *handle,  cc_set_value_t *update);
-void cc_data_update_cb(cc_handle_t *handle, void (*callback)(void *arg));
-void cc_device_status_cb(cc_handle_t *handle, void (*callback)(void *arg));
-void cc_device_disable(cc_handle_t *handle, int device_id);
+cc_update_list_t *cc_update_parse(int device_id, uint8_t *raw_data, int check_assignments);
+void cc_update_free(cc_update_list_t *updates);
 
 
 /*
