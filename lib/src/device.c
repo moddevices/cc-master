@@ -120,18 +120,45 @@ void cc_device_destroy(int device_id)
     }
 
     // destroy actuators
-    if (device->actuators)
+    if (device->actuatorgroups)
     {
-        for (int i = 0; i < device->actuators_count; i++)
-        {
-            if (device->actuators[i])
-            {
-                string_destroy(device->actuators[i]->name);
-                free(device->actuators[i]);
-            }
-        }
+      	if (device->actuators)
+    	{
+    	    for (int i = 0; i < device->actuators_count - device->actuatorgroups_count; i++)
+    	    {
+    	        if (device->actuators[i])
+    	        {
+    	            string_destroy(device->actuators[i]->name);
+    	            free(device->actuators[i]);
+    	        }
+    	    }
+	    	free(device->actuators);
 
-        free(device->actuators);
+    	    for (int i = 0; i < device->actuatorgroups_count; i++)
+    	    {
+    	        if (device->actuatorgroups[i])
+    	        {
+    	            string_destroy(device->actuatorgroups[i]->name);
+    	            free(device->actuatorgroups[i]);
+    	        }
+    	    }
+            free(device->actuatorgroups);
+    	}
+    }
+    else
+    {
+    	if (device->actuators)
+    	{
+    	    for (int i = 0; i < device->actuators_count; i++)
+    	    {
+    	        if (device->actuators[i])
+    	        {
+    	            string_destroy(device->actuators[i]->name);
+    	            free(device->actuators[i]);
+    	        }
+    	    }
+	    	free(device->actuators);
+    	}
     }
 
     // destroy URI and label
@@ -179,7 +206,7 @@ char* cc_device_descriptor(int device_id)
     json_object_set_new(root, "actuators", json_actuators);
 
     // populate actuators list
-    for (int i = 0; i < device->actuators_count; i++)
+    for (int i = 0; i < device->actuators_count - device->actuatorgroups_count; i++)
     {
         cc_actuator_t *actuator = device->actuators[i];
         json_t *json_actuator = json_object();

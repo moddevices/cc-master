@@ -325,7 +325,6 @@ int sockser_read_string(sockser_t *server, sockser_data_t *data)
 int sockser_write(sockser_data_t *data)
 {
     int ret = send(data->client_fd, data->buffer, data->size, 0);
-
     if (ret < 0)
         perror(__func__);
 

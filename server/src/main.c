@@ -161,10 +161,8 @@ static void send_event(int client_fd, const char *event, const char *data)
 {
     sockser_data_t output;
     char buffer[BUFFER_SIZE+64];
-
     // build json event
     snprintf(buffer, sizeof(buffer), "{\"event\":\"%s\",\"data\":%s}", event, data);
-
     output.client_fd = client_fd;
     output.buffer = buffer;
     output.size = strlen(buffer) + 1;
@@ -185,7 +183,6 @@ static void device_status_cb(void *arg)
         {
             // build json event data
             snprintf(buffer, sizeof(buffer), "{\"device_id\":%i,\"status\":%i}", device->id, device->status);
-
             // send event
             int client_fd = g_client_events[i].client_fd;
             send_event(client_fd, "device_status", buffer);

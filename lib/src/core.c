@@ -377,6 +377,7 @@ static void parser(cc_handle_t *handle)
                 .data_size = sizeof (dev_desc_msg_data),
                 .data = &dev_desc_msg_data
             };
+
             send(handle, &dev_desc_msg);
 
             // message received and parsed
@@ -384,7 +385,7 @@ static void parser(cc_handle_t *handle)
 
             // proceed to callback if any
             if (handle->device_status_cb)
-               handle->device_status_cb(device);
+                handle->device_status_cb(device);
         }
         else
         {
