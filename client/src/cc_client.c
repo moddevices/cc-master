@@ -273,6 +273,7 @@ int cc_client_assignment(cc_client_t *client, cc_assignment_t *assignment)
         "options", options);
 
     json_t *root = cc_client_request(client, "assignment", request_data);
+    
     if (root)
     {
         json_t *data = json_object_get(root, "data");

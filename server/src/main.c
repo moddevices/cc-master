@@ -59,7 +59,6 @@
 ****************************************************************************************************
 */
 
-
 /*
 ****************************************************************************************************
 *       INTERNAL DATA TYPES
@@ -492,12 +491,43 @@ int main(int argc, char **argv)
                 }
             }
 
-            int assignment_id = cc_assignment(handle, &assignment);
+            cc_device_t *device = cc_device_get(assignment.device_id);
 
-            // pack data and send reply
-            json_t *data = json_pack(CC_ASSIGNMENT_REPLY_FORMAT,
-                "assignment_id", assignment_id);
-            send_reply(client_fd, request, data);
+            //if groups are assigned, send 2
+            if (assignment.actuator_id >= device->actuators_count - device->actuatorgroups_count)
+            {
+                int group_id = assignment.actuator_id - (device->actuators_count - device->actuatorgroups_count);
+
+                //assignment 1
+                //change bitmask to downwards list
+                assignment.actuator_id = device->actuatorgroups[group_id]->actuators_in_actuatorgroup[0];
+                int assignment_id_1 = cc_assignment(handle, &assignment);
+
+                //cc_actuator_t *act_1 = device->actuators[assignment.actuator_id];
+                //act_1->grouped ++;
+
+                //assignment 2
+                assignment.actuator_id = device->actuatorgroups[group_id]->actuators_in_actuatorgroup[1];
+                int assignment_id_2 = cc_assignment(handle, &assignment);
+
+                //cc_actuator_t *act_2 = device->actuators[assignment.actuator_id];
+                //act_2->grouped ++;
+
+                // pack data and send reply
+                json_t *data = json_pack(CC_ASSIGNMENT_REPLY_FORMAT,
+                    "assignment_id", assignment_id_1);
+                send_reply(client_fd, request, data);
+
+            }
+            else
+            {
+                int assignment_id = cc_assignment(handle, &assignment);
+
+                json_t *data = json_pack(CC_ASSIGNMENT_REPLY_FORMAT,
+                    "assignment_id", assignment_id);
+                send_reply(client_fd, request, data);
+
+            }
 
             // free memory
             for (int i = 0; i < assignment.list_count; i++)

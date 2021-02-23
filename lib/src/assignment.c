@@ -26,7 +26,6 @@
 #include "assignment.h"
 #include "device.h"
 #include "utils.h"
-
 #include <stdlib.h>
 #include <string.h>
 
@@ -36,7 +35,6 @@
 *       INTERNAL MACROS
 ****************************************************************************************************
 */
-
 
 /*
 ****************************************************************************************************
@@ -83,29 +81,11 @@ int cc_assignment_add(cc_assignment_t *assignment)
     if (!device->assignments)
         device->assignments = calloc(CC_MAX_ASSIGNMENTS, sizeof(cc_assignment_t *));
 
-    // check the amount of assignments supported by the actuator
     cc_actuator_t *actuator = device->actuators[assignment->actuator_id];
+
     if (actuator->assignments_count >= actuator->max_assignments)
         return -1;
-    
-/*   // check if group assignment possible
-    if (assignment->actuator_id > device->actuators_count)
-    {
-        for (int i = 0; i < device->actuatorgroups_count; i++)  
-        {   
-            int j = 0;
 
-            if (device->actuators[device->actuatorgroups[i]->actuators_in_actuatorgroup[j]]->assignments_count > 0);
-            return -1;
-
-            j ++;
-
-            if (device->actuators[device->actuatorgroups[i]->actuators_in_actuatorgroup[j]]->assignments_count > 0);
-            return -1;
-
-        }          
-    }    
-*/
     // store assignment
     for (int i = 0; i < CC_MAX_ASSIGNMENTS; i++)
     {
@@ -123,16 +103,6 @@ int cc_assignment_add(cc_assignment_t *assignment)
             cc_actuator_t *actuator = device->actuators[assignment->actuator_id];
             actuator->assignments_count++;
 
-/*           // check if group assignment
-            if (assignment->actuator_id > device->actuators_count)
-            {
-                for (int i = 0; i < device->actuatorgroups_count, i++)
-                {
-
-                }
-
-            }
-*/
             return i;
         }
     }

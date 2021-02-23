@@ -45,7 +45,6 @@ enum {DEV_WAITING_HANDSHAKE, DEV_WAITING_DESCRIPTOR, DEV_WAITING_ASSIGNMENT};
 ****************************************************************************************************
 */
 
-
 /*
 ****************************************************************************************************
 *       INTERNAL DATA TYPES
@@ -124,7 +123,7 @@ void cc_device_destroy(int device_id)
     {
       	if (device->actuators)
     	{
-    	    for (int i = 0; i < device->actuators_count - device->actuatorgroups_count; i++)
+            for (int i = 0; i < device->actuators_count; i++)
     	    {
     	        if (device->actuators[i])
     	        {

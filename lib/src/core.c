@@ -360,11 +360,6 @@ static void parser(cc_handle_t *handle)
             DEBUG_MSG("  channel: %i\n", device->channel);
             DEBUG_MSG("  actuators count: %i\n", device->actuators_count);
             DEBUG_MSG("  actuatorgroups count: %i\n", device->actuatorgroups_count);
-            DEBUG_MSG(" idact1: %i\n", device->actuators[0]->id );
-            DEBUG_MSG( " group_id: %i, group_name: %s, act1_ingroup: %i, act2_ingroup: %i\n", 
-            device->actuatorgroups[0]->id, device->actuatorgroups[0]->name->text, device->actuatorgroups[0]->actuators_in_actuatorgroup[0], device->actuatorgroups[0]->actuators_in_actuatorgroup[1]);
-            DEBUG_MSG( " group_id: %i, group_name: %s, act1_ingroup: %i, act2_ingroup: %i\n",
-            device->actuatorgroups[1]->id, device->actuatorgroups[1]->name->text, device->actuatorgroups[1]->actuators_in_actuatorgroup[0], device->actuatorgroups[1]->actuators_in_actuatorgroup[1]);
 
             // device is ready to operate
             device->status = CC_DEVICE_CONNECTED;
@@ -709,12 +704,8 @@ int cc_assignment(cc_handle_t *handle, cc_assignment_t *assignment)
 {
     int id = cc_assignment_add(assignment);
 
-    DEBUG_MSG("assignment received (id: %i)\n", id);
-
     if (id < 0)
         return id;
-
-    DEBUG_MSG("  requesting assignment to device (id: %i)\n", id);
 
     // request assignment
     cc_msg_t *msg = cc_msg_builder(assignment->device_id, CC_CMD_ASSIGNMENT, assignment);
@@ -722,11 +713,9 @@ int cc_assignment(cc_handle_t *handle, cc_assignment_t *assignment)
     {
         // TODO: if timeout, try at least one more time
         DEBUG_MSG("  assignment timeout (id: %i)\n", id);
-
         // remove assignment
         cc_assignment_key_t key = {assignment->device_id, id};
         cc_assignment_remove(&key);
-
         id = -1;
     }
     else
