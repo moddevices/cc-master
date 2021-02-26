@@ -174,7 +174,7 @@ void cc_msg_parser(const cc_msg_t *msg, void *data_struct)
                 actuator->assignments_count = 0;
 
                 // set actuatorgroup flag
-                //actuator->grouped = 0;
+                actuator->grouped = 0;
             }
         }
 

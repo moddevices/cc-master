@@ -52,13 +52,13 @@
 
 #define SERIAL_BAUDRATE     115200
 
-
+#define DEBUG_MSG(...)      do { if (g_debug) fprintf(stderr, "[cc-lib] " __VA_ARGS__); } while (0)
 /*
 ****************************************************************************************************
 *       INTERNAL CONSTANTS
 ****************************************************************************************************
 */
-
+int g_debug = 2;
 /*
 ****************************************************************************************************
 *       INTERNAL DATA TYPES
@@ -192,6 +192,7 @@ static void device_status_cb(void *arg)
 static void data_update_cb(void *arg)
 {
     cc_update_list_t *updates = arg;
+    DEBUG_MSG("handeling update data");
     char buffer[BUFFER_SIZE+32];
     char encoded[BUFFER_SIZE];
 
@@ -208,7 +209,8 @@ static void data_update_cb(void *arg)
             // build json event data
             snprintf(buffer, sizeof(buffer), "{\"device_id\":%i,\"raw_data\":\"%s\"}",
                 updates->device_id, encoded);
-
+            DEBUG_MSG("launching event");
+            DEBUG_MSG("%s", buffer);
             // send event
             int client_fd = g_client_events[i].client_fd;
             send_event(client_fd, "data_update", buffer);
@@ -437,7 +439,7 @@ int main(int argc, char **argv)
             send_reply(client_fd, request, data);
         }
         else if (strcmp(request, "assignment") == 0)
-        {
+        {   DEBUG_MSG("ASSIGNMENT");
             cc_assignment_t assignment;
             double value, min, max, def;
             json_t *options;
@@ -464,6 +466,7 @@ int main(int argc, char **argv)
             // options list
             assignment.list_count = json_array_size(options);
             assignment.list_items = 0;
+
             if (assignment.list_count > 0)
             {
                 assignment.list_items = malloc(assignment.list_count * sizeof(cc_item_t *));
@@ -496,22 +499,26 @@ int main(int argc, char **argv)
             //if groups are assigned, send 2
             if (assignment.actuator_id >= device->actuators_count - device->actuatorgroups_count)
             {
+                //device->actuators[assignment.actuator_id]->assignments_count++;
+
                 int group_id = assignment.actuator_id - (device->actuators_count - device->actuatorgroups_count);
 
                 //assignment 1
                 //change bitmask to downwards list
                 assignment.actuator_id = device->actuatorgroups[group_id]->actuators_in_actuatorgroup[0];
+                ///assignment.mode |= CC_MODE_OPTIONS_DOWN;
                 int assignment_id_1 = cc_assignment(handle, &assignment);
-
-                //cc_actuator_t *act_1 = device->actuators[assignment.actuator_id];
-                //act_1->grouped ++;
+                DEBUG_MSG(" assignment id = %i\n", assignment_id_1);
+                
+                cc_actuator_t *act_1 = device->actuators[assignment.actuator_id];
+                act_1->grouped = 1;
 
                 //assignment 2
                 assignment.actuator_id = device->actuatorgroups[group_id]->actuators_in_actuatorgroup[1];
-                int assignment_id_2 = cc_assignment(handle, &assignment);
+                cc_assignment(handle, &assignment);
 
-                //cc_actuator_t *act_2 = device->actuators[assignment.actuator_id];
-                //act_2->grouped ++;
+                cc_actuator_t *act_2 = device->actuators[assignment.actuator_id];
+                act_2->grouped = 1;
 
                 // pack data and send reply
                 json_t *data = json_pack(CC_ASSIGNMENT_REPLY_FORMAT,
@@ -550,7 +557,7 @@ int main(int argc, char **argv)
             send_reply(client_fd, request, data);
         }
         else if (strcmp(request, "value_set") == 0)
-        {
+        {   DEBUG_MSG(" VALUE_SET");
             cc_set_value_t update;
             double value;
 
@@ -572,7 +579,7 @@ int main(int argc, char **argv)
 
         }
         else if (strcmp(request, "data_update") == 0)
-        {
+        {   DEBUG_MSG("DATA_UPDATE");
             int enable;
             json_unpack(data, CC_DATA_UPDATE_REQ_FORMAT, "enable", &enable);
 

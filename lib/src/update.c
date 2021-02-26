@@ -27,6 +27,9 @@
 #include <string.h>
 #include "update.h"
 #include "assignment.h"
+#include "device.h"
+#include "utils.h"
+#include <stdio.h>
 
 
 /*
@@ -34,8 +37,8 @@
 *       INTERNAL MACROS
 ****************************************************************************************************
 */
-
-
+#define DEBUG_MSG(...)      do { if (g_debug) fprintf(stderr, "[cc-lib] " __VA_ARGS__); } while (0)
+int g_debug;
 /*
 ****************************************************************************************************
 *       INTERNAL CONSTANTS
@@ -88,6 +91,37 @@ cc_update_list_t *cc_update_parse(int device_id, uint8_t *raw_data, int check_as
     {
         cc_assignment_key_t assignment;
         assignment.device_id = device_id;
+
+        //if actuator is grouped, and second actuator, change assgnment ID to the first one
+        cc_device_t *device = cc_device_get(device_id);
+        DEBUG_MSG(" Device id retrieved by update parse: %i\n", device->id);
+
+        int actuator_id = device->assignments[raw_data[j]]->actuator_id;
+        DEBUG_MSG(" Current actuator ID is: %i\n", actuator_id);
+        if (device->actuators[actuator_id]->grouped)
+        {
+            DEBUG_MSG(" Actuator is grouped indeed \n");
+            for (int i = 0; i < device->actuatorgroups_count; i++)
+            {
+                if (device->actuatorgroups[i]->actuators_in_actuatorgroup[1] == actuator_id)
+                {
+                    DEBUG_MSG(" Found actuator in group %i\n", i);
+                    //retrieve other assignment ID
+                    for (int q = 0; device->assignments[q]; q++)
+                    {
+                        if (device->assignments[q]->actuator_id == device->actuatorgroups[i]->actuators_in_actuatorgroup[0])
+                        {
+                            DEBUG_MSG(" Found group assignment with ID %i\n", q);
+                            raw_data[j] = q;
+                            continue;
+                        }
+                    }
+                }
+                else if (device->actuatorgroups[i]->actuators_in_actuatorgroup[0] == actuator_id)
+                    continue;
+            }
+        }
+
         assignment.id = raw_data[j];
 
         if (check_assignments == 0 || cc_assignment_check(&assignment))
